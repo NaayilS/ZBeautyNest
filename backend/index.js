@@ -3,28 +3,35 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import productRoutes from './routes/productRoutes.js';
+import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
-
-// Connect to Database
-connectDB();
-
-// Load environment variables
+// Load environment variables from .env file
 dotenv.config();
 
+// Initialize the Express app
 const app = express();
-const PORT = process.env.PORT || 5000;
+
+// Connect to the MongoDB database
+connectDB();
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors()); // Enable Cross-Origin Resource Sharing
+app.use(express.json()); // Parse incoming JSON requests
 
-// Basic Route
+// Define Routes
+app.use('/api/products', productRoutes);
+
+// Default Route (Optional, for testing server)
 app.get('/', (req, res) => {
     res.send('Welcome to ZBeautyNest API!');
 });
 
-app.use('/api/products', productRoutes);
+// Error Handling Middleware
+app.use(notFound);
+app.use(errorHandler);
 
+// Start the Server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
