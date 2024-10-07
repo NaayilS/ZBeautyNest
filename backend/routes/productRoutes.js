@@ -86,7 +86,14 @@ router.get('/filter', async (req, res) => {
     }
 });
 
-
+router.get('/top', async (req, res) => {
+    try {
+        const products = await Product.find({}).sort({ rating: -1 }).limit(5); // Top 5 products by rating
+        res.json(products);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 
 });
 
