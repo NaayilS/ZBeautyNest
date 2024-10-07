@@ -65,6 +65,29 @@ router.get('/:id/reviews', async (req, res) => {
     }
 });
 
+router.get('/filter', async (req, res) => {
+    const { include, exclude } = req.query;
+
+    try {
+        const query = {};
+
+        if (include) {
+            query.ingredients = { $all: include.split(',') };
+        }
+
+        if (exclude) {
+            query.ingredients = { $nin: exclude.split(',') };
+        }
+
+        const products = await Product.find(query);
+        res.json(products);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+
+
 });
 
 export default router;
