@@ -3,7 +3,7 @@ import Product from '../models/Product.js';
 
 const router = express.Router();
 
-// @desc Get all products
+
 router.get('/', async (req, res) => {
     try {
         const products = await Product.find({});
@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-// @desc Create a new product
+
 router.post('/', async (req, res) => {
     try {
         const { name, category, rating, price, ingredients } = req.body;
@@ -23,6 +23,48 @@ router.post('/', async (req, res) => {
     } catch (error) {
         res.status(400).json({ message: 'Invalid product data' });
     }
+
+router.post('/:id/reviews', async (req, res) => {
+    const { rating, comment, user } = req.body;
+    
+    try {
+        const product = await Product.findById(req.params.id);
+
+        if (product) {
+            const review = {
+                user,
+                rating: Number(rating),
+                comment,
+            };
+
+            product.reviews.push(review);
+            product.rating = product.reviews.reduce((acc, item) => item.rating + acc, 0) / product.reviews.length;
+
+            await product.save();
+            res.status(201).json({ message: 'Review added' });
+        } else {
+            res.status(404).json({ message: 'Product not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+
+router.get('/:id/reviews', async (req, res) => {
+    try {
+        const product = await Product.findById(req.params.id);
+
+        if (product) {
+            res.json(product.reviews);
+        } else {
+            res.status(404).json({ message: 'Product not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 });
 
 export default router;
